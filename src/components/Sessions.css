@@ -1,0 +1,265 @@
+.sessions-page {
+  padding: 2rem;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  flex: 1;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.filter-group select {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 0.9rem;
+}
+
+.timetable-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.timetable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.timetable th, .timetable td {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+}
+
+.class-header, .day-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 1rem;
+}
+
+.class-name {
+  background: rgba(102, 126, 234, 0.1);
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+  min-width: 120px;
+}
+
+.day-cell {
+  padding: 0;
+  vertical-align: top;
+}
+
+.time-slots {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-slot {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0.5rem;
+  min-height: 100px;
+}
+
+.time-slot:last-child {
+  border-bottom: none;
+}
+
+.time-label {
+  font-size: 0.75rem;
+  color: #4a5568;
+  margin-bottom: 0.25rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.session-cell {
+  position: relative;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.session-cell-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-cell-content {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+.session-cell-content.group-session {
+  border-width: 2px;
+}
+
+.group-badge {
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  background: #4a5568;
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.session-cell-content:hover {
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.session-cell-content.lecture {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-left: 4px solid #2196f3;
+}
+
+.session-cell-content.tutorial {
+  background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+  border-left: 4px solid #9c27b0;
+}
+
+.session-cell-content.practical {
+  background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+  border-left: 4px solid #4caf50;
+}
+
+.session-course {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  color: #2d3748;
+}
+
+.session-teacher, .session-room {
+  font-size: 0.75rem;
+  color: #4a5568;
+  margin-bottom: 0.1rem;
+}
+
+.session-type {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #667eea;
+  margin-top: 0.25rem;
+}
+
+.session-actions {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.session-cell-content:hover .session-actions {
+  opacity: 1;
+}
+
+.btn-edit-small, .btn-delete {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-small:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.btn-delete:hover {
+  background: rgba(229, 62, 62, 0.2);
+}
+
+.add-session-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px dashed #a0aec0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #a0aec0;
+  margin: 0 auto;
+  transition: all 0.2s ease;
+}
+
+.add-session-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border-color: #667eea;
+}
+
+@media (max-width: 768px) {
+  .sessions-page {
+    padding: 1rem;
+  }
+  
+  .filters-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .timetable-container {
+    margin-top: 1rem;
+    border-radius: 12px;
+  }
+}
+
+.form-hint {
+  color: #667eea;
+  font-style: italic;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+}

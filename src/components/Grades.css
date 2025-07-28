@@ -1,0 +1,94 @@
+.grades-page {
+  padding: 2rem;
+}
+
+.grades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.grade-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.grade-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.grade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.grade-info h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.grade-level {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 1rem;
+}
+
+.grade-abbreviation {
+  color: #4a5568;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.grade-abbreviation strong {
+  color: #667eea;
+}
+
+.grade-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .grades-page {
+    padding: 1rem;
+  }
+  
+  .grades-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .grade-card {
+    padding: 1rem;
+  }
+  
+  .grade-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .grade-level {
+    margin-left: 0;
+  }
+}

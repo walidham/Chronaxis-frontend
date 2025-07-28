@@ -1,0 +1,126 @@
+.rooms-page {
+  padding: 2rem;
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.room-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.room-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.room-card.unavailable {
+  border-left: 4px solid #e53e3e;
+  opacity: 0.8;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.room-info h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.room-type-icon {
+  font-size: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.room-type {
+  color: #667eea;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.room-capacity {
+  color: #48bb78;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.room-building, .room-floor {
+  color: #4a5568;
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+.room-status {
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.status-indicator.available {
+  background-color: #48bb78;
+}
+
+.status-indicator.unavailable {
+  background-color: #e53e3e;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .rooms-page {
+    padding: 1rem;
+  }
+  
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .room-card {
+    padding: 1rem;
+  }
+}
