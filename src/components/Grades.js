@@ -9,8 +9,7 @@ const Grades = () => {
   const [editingGrade, setEditingGrade] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    abbreviation: '',
-    level: 1
+    abbreviation: ''
   });
 
   useEffect(() => {
@@ -58,12 +57,10 @@ const Grades = () => {
     setEditingGrade(grade);
     setFormData(grade ? {
       name: grade.name,
-      abbreviation: grade.abbreviation,
-      level: grade.level
+      abbreviation: grade.abbreviation
     } : {
       name: '',
-      abbreviation: '',
-      level: 1
+      abbreviation: ''
     });
     setShowModal(true);
   };
@@ -77,7 +74,7 @@ const Grades = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'level' ? Number(value) : value
+      [name]: value
     });
   };
 
@@ -98,7 +95,6 @@ const Grades = () => {
             <div className="grade-info">
               <div className="grade-header">
                 <h3>{grade.name}</h3>
-                <span className="grade-level">Niveau {grade.level}</span>
               </div>
               <p className="grade-abbreviation">
                 Abréviation: <strong>{grade.abbreviation}</strong>
@@ -155,19 +151,6 @@ const Grades = () => {
                   onChange={handleChange}
                   required
                 />
-              </div>
-              <div className="form-group">
-                <label>Niveau hiérarchique:</label>
-                <input
-                  type="number"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleChange}
-                  min="1"
-                  max="10"
-                  required
-                />
-                <small className="form-hint">Plus le niveau est élevé, plus le grade est important</small>
               </div>
               <div className="modal-actions">
                 <button type="submit" className="btn-save">

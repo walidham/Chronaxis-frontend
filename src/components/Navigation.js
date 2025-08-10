@@ -1,7 +1,7 @@
 import React from 'react';
 
-const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOpen }) => {
-  const menuItems = [
+const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOpen, user }) => {
+  const baseMenuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
     { id: 'schedule', label: 'Planning', icon: '📅' },
     { id: 'sessions', label: 'Sessions', icon: '🕐' },
@@ -12,8 +12,18 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
     { id: 'departments', label: 'Départements', icon: '🏢' },
     { id: 'university', label: 'Université', icon: '🏛️' },
     { id: 'academic-years', label: 'Années Universitaires', icon: '📅' },
-    { id: 'grades', label: 'Grades', icon: '🏅' }
+    { id: 'grades', label: 'Grades', icon: '🏅' },
+    { id: 'planning', label: 'Planning PDF', icon: '📄' },
+    { id: 'timetable-test', label: 'Test Emploi du Temps', icon: '🧪' }
   ];
+
+  const adminMenuItems = [
+    { id: 'users', label: 'Gestion des Utilisateurs', icon: '👥' }
+  ];
+
+  const menuItems = user?.role === 'admin' 
+    ? [...baseMenuItems, ...adminMenuItems]
+    : baseMenuItems;
 
   const handleNavClick = (pageId) => {
     setCurrentPage(pageId);

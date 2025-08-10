@@ -33,17 +33,16 @@ const Classes = () => {
 
   const fetchData = async () => {
     try {
-      const [classesRes, departmentsRes, academicYearsRes, tracksRes] = await Promise.all([
+      const [classesRes, departmentsRes, academicYearsRes] = await Promise.all([
         axios.get('/api/classes'),
         axios.get('/api/departments'),
-        axios.get('/api/academic-years'),
-        axios.get('/api/tracks')
+        axios.get('/api/academic-years')
       ]);
       
       setClasses(classesRes.data);
       setDepartments(departmentsRes.data);
       setAcademicYears(academicYearsRes.data);
-      setTracks(tracksRes.data);
+      setTracks(['TC', 'MDW', 'DSI', 'RSI']);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -101,14 +100,14 @@ const Classes = () => {
     setFormData(classItem ? {
       name: classItem.name,
       level: classItem.level,
-      track: classItem.track?._id || classItem.track,
+      track: classItem.track || '',
       department: classItem.department?._id || classItem.department,
       academicYear: classItem.academicYear?._id || classItem.academicYear,
       students: classItem.students
     } : {
       name: '',
       level: 1,
-      track: tracks.length > 0 ? tracks[0]._id : '',
+      track: tracks.length > 0 ? tracks[0] : '',
       department: departments.length > 0 ? departments[0]._id : '',
       academicYear: academicYears.length > 0 ? academicYears[0]._id : '',
       students: 0
@@ -207,7 +206,7 @@ const Classes = () => {
               <h3>{cls.name}</h3>
               <p className="class-level">{getLevelName(cls.level)}</p>
               <p className="class-track">
-                Filière: {cls.track?.name || 'Non spécifiée'}
+                Filière: {cls.track || 'Non spécifiée'}
               </p>
               <p className="class-department">
                 Département: {cls.department?.name || 'Non spécifié'}
@@ -283,7 +282,7 @@ const Classes = () => {
                   required
                 >
                   {tracks.map(track => (
-                    <option key={track._id} value={track._id}>{track.name}</option>
+                    <option key={track} value={track}>{track}</option>
                   ))}
                 </select>
               </div>

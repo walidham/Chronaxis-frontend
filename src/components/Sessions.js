@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Sessions.css';
+import { useNotificationContext } from '../contexts/NotificationContext';
 
 const Sessions = () => {
+  const { showSuccess, showError } = useNotificationContext();
   const [sessions, setSessions] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
@@ -32,10 +34,10 @@ const Sessions = () => {
 
   const timeSlots = [
     '8h30-10h00',
-    '10h15-11h45', 
-    '12h00-13h30',
-    '14h30-16h00',
-    '16h15-17h45',
+    '10h10-11h40', 
+    '11h50-13h20',
+    '13h30-15h00',
+    '15h10-16h40',
     '16h50-18h20'
   ];
 
@@ -124,9 +126,10 @@ const Sessions = () => {
       }
       fetchSessions();
       closeModal();
+      showSuccess(editingSession?._id ? 'Séance modifiée avec succès' : 'Séance ajoutée avec succès');
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert(`Erreur: ${error.response?.data?.message || 'Une erreur est survenue'}`);
+      showError(error.response?.data?.message || 'Erreur lors de la sauvegarde de la séance');
     }
   };
 
@@ -135,8 +138,10 @@ const Sessions = () => {
       try {
         await axios.delete(`/api/sessions/${id}`);
         fetchSessions();
+        showSuccess('Séance supprimée avec succès');
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
+        showError('Erreur lors de la suppression de la séance');
       }
     }
   };
