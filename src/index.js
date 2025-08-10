@@ -4,6 +4,15 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { NotificationProvider } from './contexts/NotificationContext';
+import axios from 'axios';
+
+// Configuration axios pour production
+if (process.env.REACT_APP_API_URL) {
+  axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+} else {
+  // Fallback pour développement local
+  axios.defaults.baseURL = 'http://localhost:5000';
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
