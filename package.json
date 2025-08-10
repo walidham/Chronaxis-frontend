@@ -14,7 +14,12 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-
+  "resolutions": {
+    "css-what": "^6.1.0"
+  },
+  "overrides": {
+    "css-what": "^6.1.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
