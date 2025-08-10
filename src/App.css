@@ -27,6 +27,24 @@ body {
   align-items: center;
 }
 
+.sidebar-toggle {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.sidebar-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
 .user-info {
   display: flex;
   align-items: center;
@@ -99,7 +117,25 @@ body {
   backdrop-filter: blur(10px);
   padding: 1.5rem 0;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.navigation.collapsed {
+  width: 60px;
+}
+
+.navigation.collapsed .nav-label {
+  display: none;
+}
+
+.navigation.collapsed .nav-item {
+  justify-content: center;
+  padding: 1rem 0.5rem;
+  margin-right: 0;
+}
+
+.App-body.sidebar-collapsed .App-main {
+  margin-left: 60px;
 }
 
 .nav-item {
@@ -115,6 +151,21 @@ body {
   border-radius: 0 25px 25px 0;
   margin: 0.2rem 0;
   margin-right: 1rem;
+  position: relative;
+}
+
+.navigation.collapsed .nav-item:hover .nav-label {
+  display: block;
+  position: absolute;
+  left: 60px;
+  background: rgba(45, 55, 72, 0.95);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .nav-item:hover {

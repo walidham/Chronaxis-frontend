@@ -1,9 +1,9 @@
 import React from 'react';
 
-const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOpen, user }) => {
+const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOpen, sidebarOpen, user }) => {
   const baseMenuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
-    { id: 'schedule', label: 'Planning', icon: '📅' },
+
     { id: 'sessions', label: 'Sessions', icon: '🕐' },
     { id: 'teachers', label: 'Enseignants', icon: '👨‍🏫' },
     { id: 'classes', label: 'Classes', icon: '🎓' },
@@ -13,7 +13,8 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
     { id: 'university', label: 'Université', icon: '🏛️' },
     { id: 'academic-years', label: 'Années Universitaires', icon: '📅' },
     { id: 'grades', label: 'Grades', icon: '🏅' },
-    { id: 'planning', label: 'Planning PDF', icon: '📄' },
+
+    { id: 'planning', label: 'Emplois PDF', icon: '📄' },
     { id: 'timetable-test', label: 'Test Emploi du Temps', icon: '🧪' }
   ];
 
@@ -31,7 +32,7 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
   };
 
   return (
-    <nav className={`navigation ${mobileNavOpen ? 'open' : ''}`}>
+    <nav className={`navigation ${mobileNavOpen ? 'open' : ''} ${!sidebarOpen ? 'collapsed' : ''}`}>
       {menuItems.map(item => (
         <button
           key={item.id}

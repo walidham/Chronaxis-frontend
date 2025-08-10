@@ -24,6 +24,7 @@ import { NotificationProvider, useNotificationContext } from './contexts/Notific
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -98,6 +99,13 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <button 
+          className="sidebar-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          title={sidebarOpen ? 'Masquer le menu' : 'Afficher le menu'}
+        >
+          {sidebarOpen ? '◀' : '▶'}
+        </button>
         <h1>Chronaxis</h1>
         <div className="user-info">
           <span>Bonjour, {user.firstName} {user.lastName}</span>
@@ -109,7 +117,7 @@ function App() {
           </button>
         </div>
       </header>
-      <div className="App-body">
+      <div className={`App-body ${!sidebarOpen ? 'sidebar-collapsed' : ''}`}>
         <button 
           className="mobile-nav-toggle"
           onClick={() => setMobileNavOpen(!mobileNavOpen)}
@@ -121,6 +129,7 @@ function App() {
           setCurrentPage={setCurrentPage}
           mobileNavOpen={mobileNavOpen}
           setMobileNavOpen={setMobileNavOpen}
+          sidebarOpen={sidebarOpen}
           user={user}
         />
         <main className="App-main">
