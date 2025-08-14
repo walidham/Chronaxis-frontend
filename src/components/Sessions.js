@@ -233,12 +233,11 @@ const Sessions = () => {
           >
             {sessions.length > 1 && (
               <div className="group-badge">
-                {session.group || `Groupe ${index + 1}`}
+                G{index + 1}
               </div>
             )}
             <div className="session-course">{session.course.code || session.course.name}</div>
             <div className="session-teacher">{session.teacher.firstName.charAt(0)}. {session.teacher.lastName}</div>
-            <div className="session-room">{session.room.name}</div>
             <div className="session-actions">
               <button 
                 onClick={() => openModal(session)}
