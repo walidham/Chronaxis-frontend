@@ -66,13 +66,31 @@
   padding: 1rem;
 }
 
+/* Couleurs par classe */
 .class-name {
-  background: rgba(102, 126, 234, 0.1);
   font-weight: 600;
   text-align: center;
   vertical-align: middle;
   min-width: 120px;
+  color: white;
 }
+
+/* Couleurs spécifiques par classe */
+.class-row:nth-child(1) .class-name { background: #ff9800; } /* Orange */
+.class-row:nth-child(2) .class-name { background: #4caf50; } /* Vert */
+.class-row:nth-child(3) .class-name { background: #2196f3; } /* Bleu */
+.class-row:nth-child(4) .class-name { background: #9c27b0; } /* Violet */
+.class-row:nth-child(5) .class-name { background: #f44336; } /* Rouge */
+.class-row:nth-child(6) .class-name { background: #00bcd4; } /* Cyan */
+.class-row:nth-child(7) .class-name { background: #795548; } /* Marron */
+.class-row:nth-child(8) .class-name { background: #607d8b; } /* Bleu gris */
+.class-row:nth-child(9) .class-name { background: #e91e63; } /* Rose */
+.class-row:nth-child(10) .class-name { background: #3f51b5; } /* Indigo */
+.class-row:nth-child(11) .class-name { background: #ff5722; } /* Orange foncé */
+.class-row:nth-child(12) .class-name { background: #009688; } /* Teal */
+.class-row:nth-child(13) .class-name { background: #673ab7; } /* Violet foncé */
+.class-row:nth-child(14) .class-name { background: #ffc107; } /* Ambre */
+.class-row:nth-child(15) .class-name { background: #8bc34a; } /* Vert clair */
 
 .day-cell {
   padding: 0;
@@ -87,7 +105,9 @@
 .time-slot {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   padding: 0.5rem;
-  min-height: 100px;
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
 }
 
 .time-slot:last-child {
@@ -104,10 +124,13 @@
 
 .session-cell {
   position: relative;
-  min-height: 80px;
+  height: 90px;
+  min-height: 90px;
+  max-height: 90px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: hidden;
 }
 
 .session-cell-wrapper {
@@ -118,11 +141,16 @@
 
 .session-cell-content {
   background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: 6px;
+  padding: 0.4rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
   position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
 }
 
 .session-cell-content.group-session {
@@ -162,23 +190,29 @@
 }
 
 .session-course {
-  font-weight: 600;
-  font-size: 0.85rem;
-  margin-bottom: 0.25rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem;
   color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .session-teacher, .session-room {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #4a5568;
   margin-bottom: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .session-type {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: #667eea;
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
 }
 
 .session-actions {
