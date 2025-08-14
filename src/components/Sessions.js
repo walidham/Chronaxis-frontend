@@ -239,7 +239,6 @@ const Sessions = () => {
             <div className="session-course">{session.course.code || session.course.name}</div>
             <div className="session-teacher">{session.teacher.firstName.charAt(0)}. {session.teacher.lastName}</div>
             <div className="session-room">{session.room.name}</div>
-            <div className="session-type">{sessionTypes[session.type]}</div>
             <div className="session-actions">
               <button 
                 onClick={() => openModal(session)}

@@ -208,12 +208,7 @@
   text-overflow: ellipsis;
 }
 
-.session-type {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: #667eea;
-  margin-top: 0.1rem;
-}
+
 
 .session-actions {
   position: absolute;
