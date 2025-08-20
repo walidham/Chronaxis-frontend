@@ -4,7 +4,7 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
   const baseMenuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
 
-    { id: 'sessions', label: 'Sessions', icon: '🕐' },
+    { id: 'sessions', label: 'Gestion des séances', icon: '🕐' },
     { id: 'teachers', label: 'Enseignants', icon: '👨‍🏫' },
     { id: 'classes', label: 'Classes', icon: '🎓' },
     { id: 'courses', label: 'Cours', icon: '📚' },
@@ -13,8 +13,9 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
     { id: 'university', label: 'Université', icon: '🏛️' },
     { id: 'academic-years', label: 'Années Universitaires', icon: '📅' },
     { id: 'grades', label: 'Grades', icon: '🏅' },
+    { id: 'tracks', label: 'Parcours', icon: '🛤️' },
 
-    { id: 'planning', label: 'Emplois PDF', icon: '📄' },
+    { id: 'planning', label: 'Exporter en PDF', icon: '📄' },
     { id: 'timetable-test', label: 'Test Emploi du Temps', icon: '🧪' }
   ];
 

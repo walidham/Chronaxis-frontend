@@ -523,3 +523,10 @@
     font-size: 0.8rem;
   }
 }
+
+.form-hint {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
+}

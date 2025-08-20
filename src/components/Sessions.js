@@ -18,7 +18,8 @@ const Sessions = () => {
   const [filters, setFilters] = useState({
     department: '',
     academicYear: '',
-    semester: 1
+    semester: 1,
+    class: ''
   });
   const [formData, setFormData] = useState({
     course: '',
@@ -31,6 +32,7 @@ const Sessions = () => {
     semester: 1,
     group: ''
   });
+  const [availableCourses, setAvailableCourses] = useState([]);
 
   const timeSlots = [
     '8h30-10h00',
@@ -146,11 +148,15 @@ const Sessions = () => {
     }
   };
 
-  const openModal = (session = null) => {
+  const openModal = async (session = null) => {
     setEditingSession(session && session._id ? session : null);
     
     if (session && session._id) {
       // Mode édition - session existante
+      const selectedClass = classes.find(cls => cls._id === session.class._id);
+      if (selectedClass) {
+        await loadCoursesForClass(selectedClass);
+      }
       setFormData({
         course: session.course?._id || '',
         teacher: session.teacher?._id || '',
@@ -164,8 +170,9 @@ const Sessions = () => {
       });
     } else if (session && session.class) {
       // Mode ajout avec données pré-remplies depuis le bouton +
+      await loadCoursesForClass(session.class);
       setFormData({
-        course: courses.length > 0 ? courses[0]._id : '',
+        course: availableCourses.length > 0 ? availableCourses[0]._id : '',
         teacher: teachers.length > 0 ? teachers[0]._id : '',
         class: session.class._id,
         room: rooms.length > 0 ? rooms[0]._id : '',
@@ -177,8 +184,11 @@ const Sessions = () => {
       });
     } else {
       // Mode ajout normal
+      if (classes.length > 0) {
+        await loadCoursesForClass(classes[0]);
+      }
       setFormData({
-        course: courses.length > 0 ? courses[0]._id : '',
+        course: availableCourses.length > 0 ? availableCourses[0]._id : '',
         teacher: teachers.length > 0 ? teachers[0]._id : '',
         class: classes.length > 0 ? classes[0]._id : '',
         room: rooms.length > 0 ? rooms[0]._id : '',
@@ -197,12 +207,25 @@ const Sessions = () => {
     setEditingSession(null);
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: ['dayOfWeek', 'timeSlot', 'semester'].includes(name) ? Number(value) : value
     });
+    
+    // Si la classe change, charger les cours correspondants
+    if (name === 'class' && value) {
+      const selectedClass = classes.find(cls => cls._id === value);
+      if (selectedClass) {
+        await loadCoursesForClass(selectedClass);
+        setFormData(prev => ({
+          ...prev,
+          class: value,
+          course: availableCourses.length > 0 ? availableCourses[0]._id : ''
+        }));
+      }
+    }
   };
 
   const handleFilterChange = (e) => {
@@ -211,6 +234,20 @@ const Sessions = () => {
       ...filters,
       [name]: name === 'semester' ? Number(value) : value
     });
+  };
+
+  const loadCoursesForClass = async (selectedClass) => {
+    try {
+      if (selectedClass.department && selectedClass.track) {
+        const response = await axios.get(`/api/courses?department=${selectedClass.department._id}&track=${selectedClass.track._id}&semester=${filters.semester}`);
+        setAvailableCourses(response.data);
+      } else {
+        setAvailableCourses([]);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des cours:', error);
+      setAvailableCourses([]);
+    }
   };
 
   const getSessionsForClassAndSlot = (classId, dayIndex, timeSlotIndex) => {
@@ -307,8 +344,21 @@ const Sessions = () => {
             value={filters.semester} 
             onChange={handleFilterChange}
           >
-            {[1, 2, 3, 4, 5].map(sem => (
+            {[1, 2].map(sem => (
               <option key={sem} value={sem}>Semestre {sem}</option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-group">
+          <label>Classe:</label>
+          <select 
+            name="class" 
+            value={filters.class} 
+            onChange={handleFilterChange}
+          >
+            <option value="">Toutes les classes</option>
+            {classes.map(cls => (
+              <option key={cls._id} value={cls._id}>{cls.name}</option>
             ))}
           </select>
         </div>
@@ -326,7 +376,7 @@ const Sessions = () => {
               </tr>
             </thead>
             <tbody>
-              {classes.map(cls => (
+              {classes.filter(cls => !filters.class || cls._id === filters.class).map(cls => (
                 <tr key={cls._id} className="class-row">
                   <td className="class-name">{cls.name}</td>
                   {days.map((day, dayIndex) => (
@@ -388,11 +438,16 @@ const Sessions = () => {
                   value={formData.course}
                   onChange={handleChange}
                   required
+                  disabled={!formData.class}
                 >
-                  {courses.map(course => (
-                    <option key={course._id} value={course._id}>{course.name}</option>
+                  <option value="">Sélectionner un cours</option>
+                  {availableCourses.map(course => (
+                    <option key={course._id} value={course._id}>{course.name} ({course.code})</option>
                   ))}
                 </select>
+                {!formData.class && (
+                  <small className="form-hint">Sélectionnez d'abord une classe</small>
+                )}
               </div>
               <div className="form-group">
                 <label>Enseignant:</label>
@@ -482,7 +537,7 @@ const Sessions = () => {
                   onChange={handleChange}
                   required
                 >
-                  {[1, 2, 3, 4, 5].map(sem => (
+                  {[1, 2].map(sem => (
                     <option key={sem} value={sem}>Semestre {sem}</option>
                   ))}
                 </select>

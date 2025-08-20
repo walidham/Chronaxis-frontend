@@ -15,6 +15,7 @@ import Grades from './components/Grades';
 import Courses from './components/Courses';
 import Planning from './components/Planning';
 import TimetableTest from './components/TimetableTest';
+import Tracks from './components/Tracks';
 import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
 import Users from './components/Users';
@@ -79,6 +80,8 @@ function App() {
         return <AcademicYears />;
       case 'grades':
         return <Grades />;
+      case 'tracks':
+        return <Tracks />;
       case 'timetable-test':
         return <TimetableTest />;
       case 'users':

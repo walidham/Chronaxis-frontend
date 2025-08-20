@@ -7,6 +7,7 @@ const Classes = () => {
   const [departments, setDepartments] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
   const [tracks, setTracks] = useState([]);
+  const [availableTracks, setAvailableTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingClass, setEditingClass] = useState(null);
@@ -42,7 +43,6 @@ const Classes = () => {
       setClasses(classesRes.data);
       setDepartments(departmentsRes.data);
       setAcademicYears(academicYearsRes.data);
-      setTracks(['TC', 'MDW', 'DSI', 'RSI']);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -95,23 +95,53 @@ const Classes = () => {
     }
   };
 
-  const openModal = (classItem = null) => {
+  const openModal = async (classItem = null) => {
     setEditingClass(classItem);
-    setFormData(classItem ? {
-      name: classItem.name,
-      level: classItem.level,
-      track: classItem.track || '',
-      department: classItem.department?._id || classItem.department,
-      academicYear: classItem.academicYear?._id || classItem.academicYear,
-      students: classItem.students
-    } : {
-      name: '',
-      level: 1,
-      track: tracks.length > 0 ? tracks[0] : '',
-      department: departments.length > 0 ? departments[0]._id : '',
-      academicYear: academicYears.length > 0 ? academicYears[0]._id : '',
-      students: 0
-    });
+    
+    if (classItem) {
+      // Mode édition
+      const departmentId = classItem.department?._id || classItem.department;
+      setFormData({
+        name: classItem.name,
+        level: classItem.level,
+        track: classItem.track?._id || classItem.track || '',
+        department: departmentId,
+        academicYear: classItem.academicYear?._id || classItem.academicYear,
+        students: classItem.students
+      });
+      
+      // Charger les parcours pour le département de la classe
+      if (departmentId) {
+        try {
+          const response = await axios.get(`/api/tracks?department=${departmentId}`);
+          setAvailableTracks(response.data);
+        } catch (error) {
+          console.error('Erreur lors du chargement des parcours:', error);
+          setAvailableTracks([]);
+        }
+      }
+    } else {
+      // Mode ajout
+      setFormData({
+        name: '',
+        level: 1,
+        track: '',
+        department: departments.length > 0 ? departments[0]._id : '',
+        academicYear: academicYears.length > 0 ? academicYears[0]._id : '',
+        students: 0
+      });
+      
+      // Charger les parcours pour le premier département
+      if (departments.length > 0) {
+        try {
+          const response = await axios.get(`/api/tracks?department=${departments[0]._id}`);
+          setAvailableTracks(response.data);
+        } catch (error) {
+          console.error('Erreur lors du chargement des parcours:', error);
+          setAvailableTracks([]);
+        }
+      }
+    }
     setShowModal(true);
   };
 
@@ -120,12 +150,29 @@ const Classes = () => {
     setEditingClass(null);
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: name === 'level' || name === 'students' ? Number(value) : value
     });
+    
+    // Si le département change, charger les parcours correspondants
+    if (name === 'department' && value) {
+      try {
+        const response = await axios.get(`/api/tracks?department=${value}`);
+        setAvailableTracks(response.data);
+        // Réinitialiser le parcours sélectionné
+        setFormData(prev => ({
+          ...prev,
+          department: value,
+          track: response.data.length > 0 ? response.data[0]._id : ''
+        }));
+      } catch (error) {
+        console.error('Erreur lors du chargement des parcours:', error);
+        setAvailableTracks([]);
+      }
+    }
   };
 
   const handleFilterChange = (e) => {
@@ -206,7 +253,7 @@ const Classes = () => {
               <h3>{cls.name}</h3>
               <p className="class-level">{getLevelName(cls.level)}</p>
               <p className="class-track">
-                Filière: {cls.track || 'Non spécifiée'}
+                Filière: {cls.track?.name || cls.track || 'Non spécifiée'}
               </p>
               <p className="class-department">
                 Département: {cls.department?.name || 'Non spécifié'}
@@ -274,19 +321,6 @@ const Classes = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label>Filière:</label>
-                <select
-                  name="track"
-                  value={formData.track}
-                  onChange={handleChange}
-                  required
-                >
-                  {tracks.map(track => (
-                    <option key={track} value={track}>{track}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
                 <label>Département:</label>
                 <select
                   name="department"
@@ -298,6 +332,24 @@ const Classes = () => {
                     <option key={dept._id} value={dept._id}>{dept.name}</option>
                   ))}
                 </select>
+              </div>
+              <div className="form-group">
+                <label>Filière:</label>
+                <select
+                  name="track"
+                  value={formData.track}
+                  onChange={handleChange}
+                  required
+                  disabled={!formData.department}
+                >
+                  <option value="">Sélectionner une filière</option>
+                  {availableTracks.map(track => (
+                    <option key={track._id} value={track._id}>{track.name} ({track.code})</option>
+                  ))}
+                </select>
+                {!formData.department && (
+                  <small className="form-hint">Sélectionnez d'abord un département</small>
+                )}
               </div>
               <div className="form-group">
                 <label>Année universitaire:</label>

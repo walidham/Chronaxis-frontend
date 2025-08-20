@@ -317,3 +317,10 @@
   margin-top: 0.25rem;
   display: block;
 }
+
+.modal-form .form-hint {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
+}

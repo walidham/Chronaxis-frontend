@@ -8,6 +8,7 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [tracks, setTracks] = useState([]);
+  const [availableTracks, setAvailableTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
@@ -42,7 +43,6 @@ const Courses = () => {
       
       setCourses(coursesRes.data);
       setDepartments(departmentsRes.data);
-      setTracks(['TC', 'MDW', 'DSI', 'RSI']);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -80,19 +80,31 @@ const Courses = () => {
     }
   };
 
-  const openModal = (course = null) => {
+  const openModal = async (course = null) => {
     setEditingCourse(course);
     
     if (course) {
       // Mode édition
+      const departmentId = course.department?._id || '';
       setFormData({
         name: course.name,
         code: course.code,
         semester: course.semester,
         hours: course.hours || { lectures: 0, tutorials: 0, practicals: 0 },
-        department: course.department?._id || '',
-        track: course.track || ''
+        department: departmentId,
+        track: course.track?._id || course.track || ''
       });
+      
+      // Charger les parcours pour le département du cours
+      if (departmentId) {
+        try {
+          const response = await axios.get(`/api/tracks?department=${departmentId}`);
+          setAvailableTracks(response.data);
+        } catch (error) {
+          console.error('Erreur lors du chargement des parcours:', error);
+          setAvailableTracks([]);
+        }
+      }
     } else {
       // Mode ajout
       setFormData({
@@ -100,9 +112,20 @@ const Courses = () => {
         code: '',
         semester: 1,
         hours: { lectures: 0, tutorials: 0, practicals: 0 },
-        department: '',
+        department: departments.length > 0 ? departments[0]._id : '',
         track: ''
       });
+      
+      // Charger les parcours pour le premier département
+      if (departments.length > 0) {
+        try {
+          const response = await axios.get(`/api/tracks?department=${departments[0]._id}`);
+          setAvailableTracks(response.data);
+        } catch (error) {
+          console.error('Erreur lors du chargement des parcours:', error);
+          setAvailableTracks([]);
+        }
+      }
     }
     
     setShowModal(true);
@@ -113,7 +136,7 @@ const Courses = () => {
     setEditingCourse(null);
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     if (name.startsWith('hours.')) {
       const hourType = name.split('.')[1];
@@ -129,6 +152,23 @@ const Courses = () => {
         ...formData,
         [name]: ['semester'].includes(name) ? Number(value) : value
       });
+      
+      // Si le département change, charger les parcours correspondants
+      if (name === 'department' && value) {
+        try {
+          const response = await axios.get(`/api/tracks?department=${value}`);
+          setAvailableTracks(response.data);
+          // Réinitialiser le parcours sélectionné
+          setFormData(prev => ({
+            ...prev,
+            department: value,
+            track: response.data.length > 0 ? response.data[0]._id : ''
+          }));
+        } catch (error) {
+          console.error('Erreur lors du chargement des parcours:', error);
+          setAvailableTracks([]);
+        }
+      }
     }
   };
 
@@ -283,7 +323,7 @@ const Courses = () => {
                   <td className="course-name-cell">{course.name}</td>
                   <td>S{course.semester}</td>
                   <td>{course.department?.name || '-'}</td>
-                  <td>{course.track || '-'}</td>
+                  <td>{course.track?.name || course.track || '-'}</td>
                   <td>{(course.hours?.lectures || 0).toString().replace('.', ',')}h</td>
                   <td>{(course.hours?.tutorials || 0).toString().replace('.', ',')}h</td>
                   <td>{(course.hours?.practicals || 0).toString().replace('.', ',')}h</td>
@@ -381,12 +421,16 @@ const Courses = () => {
                   value={formData.track}
                   onChange={handleChange}
                   required
+                  disabled={!formData.department}
                 >
                   <option value="">Sélectionner une filière</option>
-                  {tracks.map(track => (
-                    <option key={track} value={track}>{track}</option>
+                  {availableTracks.map(track => (
+                    <option key={track._id} value={track._id}>{track.name} ({track.code})</option>
                   ))}
                 </select>
+                {!formData.department && (
+                  <small className="form-hint">Sélectionnez d'abord un département</small>
+                )}
               </div>
               <div className="hours-group">
                 <label>Heures d'enseignement:</label>
