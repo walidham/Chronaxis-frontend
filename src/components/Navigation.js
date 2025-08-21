@@ -34,6 +34,10 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
 
   return (
     <nav className={`navigation ${mobileNavOpen ? 'open' : ''} ${!sidebarOpen ? 'collapsed' : ''}`}>
+      <div className="nav-header">
+        <img src="/logo192.png" alt="Chronaxis" className="nav-logo" />
+        <span className="nav-title">Chronaxis</span>
+      </div>
       {menuItems.map(item => (
         <button
           key={item.id}

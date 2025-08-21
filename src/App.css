@@ -120,6 +120,42 @@ body {
   transition: all 0.3s ease;
 }
 
+.nav-header {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.nav-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+  border-radius: 8px;
+}
+
+.nav-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.navigation.collapsed .nav-header {
+  padding: 0 0.5rem 1rem 0.5rem;
+}
+
+.navigation.collapsed .nav-title {
+  display: none;
+}
+
+.navigation.collapsed .nav-logo {
+  margin-right: 0;
+}
+
 .navigation.collapsed {
   width: 60px;
 }
