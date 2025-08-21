@@ -32,10 +32,17 @@ const AcademicYears = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingYear) {
-        await axios.put(`/api/academic-years/${editingYear._id}`, formData);
+        await axios.put(`/api/academic-years/${editingYear._id}`, formData, config);
       } else {
-        await axios.post('/api/academic-years', formData);
+        await axios.post('/api/academic-years', formData, config);
       }
       fetchAcademicYears();
       closeModal();
@@ -47,7 +54,13 @@ const AcademicYears = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette année universitaire ?')) {
       try {
-        await axios.delete(`/api/academic-years/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/academic-years/${id}`, config);
         fetchAcademicYears();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
@@ -127,13 +140,13 @@ const AcademicYears = () => {
             </div>
             <div className="academic-year-actions">
               <button 
-                onClick={() => openModal(year)}
+                onClick={openModal.bind(null, year)}
                 className="btn-edit-small"
               >
                 ✏️
               </button>
               <button 
-                onClick={() => handleDelete(year._id)}
+                onClick={handleDelete.bind(null, year._id)}
                 className="btn-delete"
               >
                 🗑️

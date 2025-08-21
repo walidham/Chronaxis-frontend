@@ -49,10 +49,17 @@ const Users = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingUser) {
-        await axios.put(`/api/users/${editingUser._id}`, formData);
+        await axios.put(`/api/users/${editingUser._id}`, formData, config);
       } else {
-        await axios.post('/api/users', formData);
+        await axios.post('/api/users', formData, config);
       }
       fetchUsers();
       resetForm();
@@ -82,7 +89,13 @@ const Users = () => {
   const handleDelete = async (userId) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       try {
-        await axios.delete(`/api/users/${userId}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/users/${userId}`, config);
         fetchUsers();
         showSuccess('Utilisateur supprimé avec succès');
       } catch (error) {

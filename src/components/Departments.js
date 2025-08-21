@@ -30,10 +30,17 @@ const Departments = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingDepartment) {
-        await axios.put(`/api/departments/${editingDepartment._id}`, formData);
+        await axios.put(`/api/departments/${editingDepartment._id}`, formData, config);
       } else {
-        await axios.post('/api/departments', formData);
+        await axios.post('/api/departments', formData, config);
       }
       fetchDepartments();
       closeModal();
@@ -45,7 +52,13 @@ const Departments = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce département ?')) {
       try {
-        await axios.delete(`/api/departments/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/departments/${id}`, config);
         fetchDepartments();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);

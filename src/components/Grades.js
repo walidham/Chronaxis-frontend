@@ -30,10 +30,17 @@ const Grades = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingGrade) {
-        await axios.put(`/api/grades/${editingGrade._id}`, formData);
+        await axios.put(`/api/grades/${editingGrade._id}`, formData, config);
       } else {
-        await axios.post('/api/grades', formData);
+        await axios.post('/api/grades', formData, config);
       }
       fetchGrades();
       closeModal();
@@ -45,7 +52,13 @@ const Grades = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce grade ?')) {
       try {
-        await axios.delete(`/api/grades/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/grades/${id}`, config);
         fetchGrades();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);

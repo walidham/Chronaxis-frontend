@@ -53,10 +53,17 @@ const Courses = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingCourse) {
-        await axios.put(`/api/courses/${editingCourse._id}`, formData);
+        await axios.put(`/api/courses/${editingCourse._id}`, formData, config);
       } else {
-        await axios.post('/api/courses', formData);
+        await axios.post('/api/courses', formData, config);
       }
       fetchData();
       closeModal();
@@ -70,7 +77,13 @@ const Courses = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')) {
       try {
-        await axios.delete(`/api/courses/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/courses/${id}`, config);
         fetchData();
         showSuccess('Cours supprimé avec succès');
       } catch (error) {

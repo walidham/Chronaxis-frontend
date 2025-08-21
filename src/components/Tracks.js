@@ -50,11 +50,18 @@ const Tracks = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingTrack) {
-        await axios.put(`/api/tracks/${editingTrack._id}`, formData);
+        await axios.put(`/api/tracks/${editingTrack._id}`, formData, config);
         showSuccess('Parcours modifié avec succès');
       } else {
-        await axios.post('/api/tracks', formData);
+        await axios.post('/api/tracks', formData, config);
         showSuccess('Parcours ajouté avec succès');
       }
       fetchTracks();
@@ -68,7 +75,13 @@ const Tracks = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce parcours ?')) {
       try {
-        await axios.delete(`/api/tracks/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/tracks/${id}`, config);
         fetchTracks();
         showSuccess('Parcours supprimé avec succès');
       } catch (error) {

@@ -37,10 +37,17 @@ const ChangePassword = ({ onClose }) => {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       await axios.put('/api/auth/change-password', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
-      });
+      }, config);
       
       setSuccess('Mot de passe modifié avec succès');
       setTimeout(() => {

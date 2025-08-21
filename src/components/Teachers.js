@@ -55,10 +55,17 @@ const Teachers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      
       if (editingTeacher) {
-        await axios.put(`/api/teachers/${editingTeacher._id}`, formData);
+        await axios.put(`/api/teachers/${editingTeacher._id}`, formData, config);
       } else {
-        await axios.post('/api/teachers', formData);
+        await axios.post('/api/teachers', formData, config);
       }
       fetchTeachers();
       closeModal();
@@ -70,7 +77,13 @@ const Teachers = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet enseignant ?')) {
       try {
-        await axios.delete(`/api/teachers/${id}`);
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        await axios.delete(`/api/teachers/${id}`, config);
         fetchTeachers();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
