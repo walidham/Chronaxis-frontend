@@ -15,6 +15,10 @@ import Grades from './components/Grades';
 import Courses from './components/Courses';
 import Planning from './components/Planning';
 import TimetableTest from './components/TimetableTest';
+import PDFEmplois from './components/PDFEmplois';
+import PDFEnseignants from './components/PDFEnseignants';
+import PDFBilan from './components/PDFBilan';
+import './components/PDFPages.css';
 import Tracks from './components/Tracks';
 import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
@@ -62,6 +66,12 @@ function App() {
         return <ScheduleGrid />;
       case 'planning':
         return <Planning />;
+      case 'pdf-emplois':
+        return <PDFEmplois />;
+      case 'pdf-enseignants':
+        return <PDFEnseignants />;
+      case 'pdf-bilan':
+        return <PDFBilan />;
       case 'sessions':
         return <Sessions />;
       case 'teachers':

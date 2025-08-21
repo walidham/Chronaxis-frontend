@@ -15,7 +15,9 @@ const Navigation = ({ currentPage, setCurrentPage, mobileNavOpen, setMobileNavOp
     { id: 'grades', label: 'Grades', icon: '🏅' },
     { id: 'tracks', label: 'Parcours', icon: '🛤️' },
 
-    { id: 'planning', label: 'Exporter en PDF', icon: '📄' },
+    { id: 'pdf-emplois', label: 'PDF - Emplois du temps', icon: '📄' },
+    { id: 'pdf-enseignants', label: 'PDF - Enseignants', icon: '👨🏫' },
+    { id: 'pdf-bilan', label: 'PDF - Bilan', icon: '📊' },
     { id: 'timetable-test', label: 'Test Emploi du Temps', icon: '🧪' }
   ];
 
