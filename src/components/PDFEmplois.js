@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import './PDFPages.css';
 
 const PDFEmplois = () => {
   const [departments, setDepartments] = useState([]);
@@ -10,6 +11,8 @@ const PDFEmplois = () => {
   const [teachers, setTeachers] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [currentPdf, setCurrentPdf] = useState(null);
   
   const [filters, setFilters] = useState({
     type: 'classes', // classes, teachers, rooms
@@ -77,12 +80,24 @@ const PDFEmplois = () => {
     setLoading(true);
     try {
       const sessions = await fetchSessions();
-      createPDF(sessions);
+      const pdf = await createPDF(sessions);
+      const pdfBlob = pdf.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+      setPdfUrl(url);
+      setCurrentPdf(pdf);
     } catch (error) {
       console.error('Erreur lors de la génération:', error);
       alert('Erreur lors de la génération du PDF');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const printPDF = () => {
+    if (currentPdf) {
+      const targetItem = getTargetOptions().find(item => item._id === filters.target);
+      const fileName = `Emploi_du_temps_${getTargetLabel(targetItem || {})}.pdf`;
+      currentPdf.save(fileName);
     }
   };
 
@@ -115,14 +130,15 @@ const PDFEmplois = () => {
     
     if (filters.target === 'all') {
       // Générer pour tous les éléments
-      await generateAllPDFs(doc, sessions, university, templatesData);
+      return await generateAllPDFs(doc, sessions, university, templatesData);
     } else {
       // Générer pour un élément spécifique
       const targetItem = await getTargetItem();
       if (targetItem) {
-        generateSinglePDF(doc, sessions, targetItem, university, templatesData);
+        return generateSinglePDF(doc, sessions, targetItem, university, templatesData);
       }
     }
+    return doc;
   };
 
   const loadTemplates = async () => {
@@ -150,7 +166,7 @@ const PDFEmplois = () => {
     }
   };
 
-  const generateHeader = (pdf, item, type, university, templates) => {
+  const generateHeader = (pdf, item, type, university, templates, sessions) => {
     const templateKey = type === 'classes' ? 'classes' : type === 'teachers' ? 'teachers' : 'rooms';
     const template = templates[templateKey];
     
@@ -182,8 +198,8 @@ const PDFEmplois = () => {
           pdf.setFontSize(12);
           pdf.setFont(undefined, 'bold');
         } else if (line.includes('Classe:') || line.includes('Enseignant:') || line.includes('Salle:')) {
-          pdf.setFontSize(10);
-          pdf.setFont(undefined, 'normal');
+          pdf.setFontSize(12);
+          pdf.setFont(undefined, 'bold');
         } else {
           pdf.setFontSize(7);
           pdf.setFont(undefined, 'bold');
@@ -193,14 +209,49 @@ const PDFEmplois = () => {
         let yPos = 10 + (index * 3);
         
         if (line.includes('EMPLOI DU TEMPS')) yPos += 3;
-        if (line.includes(':') && index > 0) yPos += 6;
+        if (line.includes(':') && index > 0) yPos += 5;
         
         pdf.text(line.trim(), (297 - textWidth) / 2, yPos);
       });
     }
+    
+    // Ajouter les totaux pour les enseignants
+    if (type === 'teachers' && sessions.length > 0) {
+      // Filtrer les sessions de l'enseignant pour le calcul
+      const teacherSessions = sessions.filter(s => s.teacher?._id === item._id);
+      
+      // Calculer les totaux d'heures
+      let totalHours = 0, coursHours = 0, tdHours = 0, tpHours = 0;
+      
+      teacherSessions.forEach(session => {
+        if (session.type === 'LECTURE') {
+          totalHours += 1.5;
+          coursHours += 1;
+          tdHours += 0.5;
+        } else if (session.type === 'PRACTICAL') {
+          totalHours += 1.5;
+          tpHours += 1.5;
+        } else {
+          // Pour tous les autres types (TD, etc.), compter comme TD
+          totalHours += 1.5;
+          tdHours += 1.5;
+        }
+      });
+      
+      // Afficher les totaux à droite
+      pdf.setFontSize(8);
+      pdf.setFont(undefined, 'normal');
+      const totalsText = `Total: ${totalHours}h, Cours: ${coursHours}h, TD: ${tdHours}h, TP: ${tpHours}h`;
+      const totalsWidth = pdf.getTextWidth(totalsText);
+      pdf.text(totalsText, 297 - 15 - totalsWidth, 35);
+    }
   };
 
-  const generateTable = (pdf, sessions) => {
+  const generateTable = (pdf, sessions, teacherId = null) => {
+    // Filtrer les sessions par enseignant si spécifié
+    const filteredSessions = teacherId ? 
+      sessions.filter(s => s.teacher?._id === teacherId) : 
+      sessions;
     const timeSlots = ['8h30-10h00', '10h10-11h40', '11h50-13h20', '13h30-15h00', '15h10-16h40', '16h50-18h20'];
     const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
     const tableData = [];
@@ -208,7 +259,7 @@ const PDFEmplois = () => {
     timeSlots.forEach((timeSlot, timeIndex) => {
       const row = [timeSlot];
       days.forEach((day, dayIndex) => {
-        const sessionsForSlot = sessions.filter(s => 
+        const sessionsForSlot = filteredSessions.filter(s => 
           s.dayOfWeek === dayIndex + 1 && s.timeSlot === timeIndex + 1
         );
         
@@ -224,7 +275,7 @@ const PDFEmplois = () => {
     pdf.autoTable({
       head: [['Horaires', ...days]],
       body: tableData,
-      startY: 40,
+      startY: 42,
       margin: { left: 15, right: 15 },
       styles: { 
         fontSize: 8, 
@@ -263,42 +314,64 @@ const PDFEmplois = () => {
               pdf.line(cellX, cellY + yOffset, cellX + cellWidth, cellY + yOffset);
             }
             
-            // Code du cours au centre
+            // Code de la matière en haut
             if (session.course) {
-              pdf.setFontSize(8);
+              pdf.setFontSize(7);
               pdf.setFont(undefined, 'bold');
               const courseText = session.course.code;
               const courseWidth = pdf.getTextWidth(courseText);
-              pdf.text(courseText, cellX + (cellWidth - courseWidth) / 2, cellY + yOffset + sessionHeight / 2 + 1);
+              pdf.text(courseText, cellX + (cellWidth - courseWidth) / 2, cellY + yOffset + 5);
             }
             
-            // Enseignant en haut à gauche
-            if (session.teacher) {
+            // Affichage selon le type d'emploi du temps
+            const bottomTexts = [];
+            if (teacherId) {
+              // Pour les emplois d'enseignants, afficher la classe + groupe
+              if (session.class) {
+                let classText = session.class.name;
+                if (session.group && session.group.trim() !== '') {
+                  const groupText = session.group.replace('Groupe ', 'G');
+                  classText += ` ${groupText}`;
+                }
+                bottomTexts.push(classText);
+              }
+              if (session.room) {
+                bottomTexts.push(session.room.name);
+              }
+            } else if (filters.type === 'rooms') {
+              // Pour les emplois de salles, afficher la classe + groupe et l'enseignant
+              if (session.class) {
+                let classText = session.class.name;
+                if (session.group && session.group.trim() !== '') {
+                  const groupText = session.group.replace('Groupe ', 'G');
+                  classText += ` ${groupText}`;
+                }
+                bottomTexts.push(classText);
+              }
+              if (session.teacher) {
+                const teacherText = `${session.teacher.firstName.charAt(0)}.${session.teacher.lastName}`;
+                bottomTexts.push(teacherText);
+              }
+            } else {
+              // Pour les emplois de classes, afficher l'enseignant et la salle
+              if (session.teacher) {
+                const teacherText = `${session.teacher.firstName.charAt(0)}.${session.teacher.lastName}`;
+                bottomTexts.push(teacherText);
+              }
+              if (session.room) {
+                bottomTexts.push(session.room.name);
+              }
+            }
+            
+            if (bottomTexts.length > 0) {
               pdf.setFontSize(6);
               pdf.setFont(undefined, 'normal');
-              pdf.text(`${session.teacher.firstName} ${session.teacher.lastName}`, cellX + 1, cellY + yOffset + 5);
+              const combinedText = bottomTexts.join(' - ');
+              const textWidth = pdf.getTextWidth(combinedText);
+              pdf.text(combinedText, cellX + cellWidth - textWidth - 1, cellY + yOffset + sessionHeight - 2);
             }
             
-            // Salle en bas à droite
-            if (session.room) {
-              pdf.setFontSize(6);
-              pdf.setFont(undefined, 'normal');
-              const roomText = session.room.name;
-              const roomWidth = pdf.getTextWidth(roomText);
-              pdf.text(roomText, cellX + cellWidth - roomWidth - 1, cellY + yOffset + sessionHeight - 2);
-            }
-            
-            // Groupe si présent
-            let groupText = '';
-            if (session.group) groupText = session.group.replace('Groupe ', 'G');
-            else if (session.groupName) groupText = session.groupName.replace('Groupe ', 'G');
-            
-            if (groupText) {
-              pdf.setFontSize(5);
-              pdf.setFont(undefined, 'normal');
-              const groupWidth = pdf.getTextWidth(groupText);
-              pdf.text(groupText, cellX + (cellWidth - groupWidth) / 2, cellY + yOffset + sessionHeight - 2);
-            }
+
           });
         }
       }
@@ -333,12 +406,12 @@ const PDFEmplois = () => {
 
   const generateSinglePDF = (pdf, sessions, item, university, templates) => {
     const type = filters.type === 'classes' ? 'classes' : filters.type === 'teachers' ? 'teachers' : 'rooms';
-    generateHeader(pdf, item, type, university, templates);
-    generateTable(pdf, sessions);
+    const teacherId = type === 'teachers' ? item._id : null;
+    generateHeader(pdf, item, type, university, templates, sessions);
+    generateTable(pdf, sessions, teacherId);
     generateFooter(pdf, university);
     
-    const fileName = `Emploi_du_temps_${getTargetLabel(item)}.pdf`;
-    pdf.save(fileName);
+    return pdf;
   };
 
   const generateAllPDFs = async (pdf, allSessions, university, templates) => {
@@ -359,15 +432,13 @@ const PDFEmplois = () => {
       if (i > 0) pdf.addPage();
       
       const type = filters.type === 'classes' ? 'classes' : filters.type === 'teachers' ? 'teachers' : 'rooms';
-      generateHeader(pdf, target, type, university, templates);
-      generateTable(pdf, targetSessions);
+      const teacherId = type === 'teachers' ? target._id : null;
+      generateHeader(pdf, target, type, university, templates, targetSessions);
+      generateTable(pdf, targetSessions, teacherId);
       generateFooter(pdf, university);
     }
     
-    const department = departments.find(d => d._id === filters.department);
-    const academicYear = academicYears.find(y => y._id === filters.academicYear);
-    const fileName = `Emplois_du_temps_${filters.type}_${department?.name || 'Dept'}_${academicYear?.name || 'Annee'}_S${filters.semester}.pdf`;
-    pdf.save(fileName);
+    return pdf;
   };
 
   const getTargetItem = async () => {
@@ -402,61 +473,85 @@ const PDFEmplois = () => {
       </div>
 
       <div className="pdf-form">
-        <div className="form-group">
-          <label>Type d'emploi :</label>
-          <select name="type" value={filters.type} onChange={handleFilterChange}>
-            <option value="classes">Classes</option>
-            <option value="teachers">Enseignants</option>
-            <option value="rooms">Salles</option>
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Type d'emploi :</label>
+            <select name="type" value={filters.type} onChange={handleFilterChange}>
+              <option value="classes">Classes</option>
+              <option value="teachers">Enseignants</option>
+              <option value="rooms">Salles</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Département :</label>
+            <select name="department" value={filters.department} onChange={handleFilterChange}>
+              <option value="">Sélectionner un département</option>
+              {departments.map(dept => (
+                <option key={dept._id} value={dept._id}>{dept.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Année universitaire :</label>
+            <select name="academicYear" value={filters.academicYear} onChange={handleFilterChange}>
+              <option value="">Sélectionner une année</option>
+              {academicYears.map(year => (
+                <option key={year._id} value={year._id}>{year.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Département :</label>
-          <select name="department" value={filters.department} onChange={handleFilterChange}>
-            <option value="">Sélectionner un département</option>
-            {departments.map(dept => (
-              <option key={dept._id} value={dept._id}>{dept.name}</option>
-            ))}
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Semestre :</label>
+            <select name="semester" value={filters.semester} onChange={handleFilterChange}>
+              <option value={1}>Semestre 1</option>
+              <option value={2}>Semestre 2</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>{filters.type === 'classes' ? 'Classe' : filters.type === 'teachers' ? 'Enseignant' : 'Salle'} :</label>
+            <select name="target" value={filters.target} onChange={handleFilterChange}>
+              <option value="">Sélectionner</option>
+              <option value="all">Tous</option>
+              {getTargetOptions().map(item => (
+                <option key={item._id} value={item._id}>{getTargetLabel(item)}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Année universitaire :</label>
-          <select name="academicYear" value={filters.academicYear} onChange={handleFilterChange}>
-            <option value="">Sélectionner une année</option>
-            {academicYears.map(year => (
-              <option key={year._id} value={year._id}>{year.name}</option>
-            ))}
-          </select>
+        <div className="pdf-buttons">
+          <button 
+            onClick={generatePDF} 
+            disabled={loading || !filters.department || !filters.academicYear}
+            className="btn-generate"
+          >
+            {loading ? 'Génération...' : 'Générer PDF'}
+          </button>
+          
+          {pdfUrl && (
+            <button 
+              onClick={printPDF}
+              className="btn-print"
+            >
+              Télécharger PDF
+            </button>
+          )}
         </div>
 
-        <div className="form-group">
-          <label>Semestre :</label>
-          <select name="semester" value={filters.semester} onChange={handleFilterChange}>
-            <option value={1}>Semestre 1</option>
-            <option value={2}>Semestre 2</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>{filters.type === 'classes' ? 'Classe' : filters.type === 'teachers' ? 'Enseignant' : 'Salle'} :</label>
-          <select name="target" value={filters.target} onChange={handleFilterChange}>
-            <option value="">Sélectionner</option>
-            <option value="all">Tous</option>
-            {getTargetOptions().map(item => (
-              <option key={item._id} value={item._id}>{getTargetLabel(item)}</option>
-            ))}
-          </select>
-        </div>
-
-        <button 
-          onClick={generatePDF} 
-          disabled={loading || !filters.department || !filters.academicYear}
-          className="btn-generate"
-        >
-          {loading ? 'Génération...' : 'Générer PDF'}
-        </button>
+        {pdfUrl && (
+          <div className="pdf-preview">
+            <h3>Aperçu de l'emploi du temps</h3>
+            <iframe 
+              src={pdfUrl}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

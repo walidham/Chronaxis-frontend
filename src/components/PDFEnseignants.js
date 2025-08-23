@@ -79,10 +79,38 @@ const PDFEnseignants = () => {
         allTeachers = allTeachers.filter(teacher => teacher.grade?._id === filters.grade);
       }
 
-      // Ne garder que les enseignants ayant au moins une séance
+      // Ne garder que les enseignants ayant au moins une séance et calculer leurs statistiques
       const teachersWithSessions = allTeachers.filter(teacher =>
         sessions.some(session => session.teacher?._id === teacher._id)
-      );
+      ).map(teacher => {
+        const teacherSessions = sessions.filter(s => s.teacher?._id === teacher._id);
+        const subjects = [...new Set(teacherSessions.map(s => s.course?.name).filter(Boolean))];
+        
+        // Calculer les heures par type
+        let totalHours = 0, coursHours = 0, tdHours = 0, tpHours = 0;
+        
+        teacherSessions.forEach(session => {
+          const duration = 1.5; // Chaque session = 1.5h
+          totalHours += duration;
+          
+          if (session.sessionType === 'Cours') {
+            coursHours += duration;
+          } else if (session.sessionType === 'TD') {
+            tdHours += duration;
+          } else if (session.sessionType === 'TP') {
+            tpHours += duration;
+          }
+        });
+        
+        return {
+          ...teacher,
+          subjects,
+          totalHours,
+          coursHours,
+          tdHours,
+          tpHours
+        };
+      });
 
       return teachersWithSessions;
     } catch (error) {
@@ -92,10 +120,10 @@ const PDFEnseignants = () => {
   };
 
   const createPDF = (teachersData) => {
-    const doc = new jsPDF();
+    const doc = new jsPDF('l', 'mm', 'a4'); // Format paysage
     
     doc.setFontSize(16);
-    doc.text('Liste des Enseignants', 20, 20);
+    doc.text('Liste des Enseignants avec Matières Enseignées', 20, 20);
     
     const selectedDept = departments.find(d => d._id === filters.department);
     const selectedYear = academicYears.find(y => y._id === filters.academicYear);
@@ -114,30 +142,45 @@ const PDFEnseignants = () => {
       index + 1,
       `${teacher.firstName} ${teacher.lastName}`,
       teacher.grade?.name || '',
-      teacher.specialization || '',
-      teacher.email || ''
+      teacher.subjects.join(', '),
+      teacher.totalHours.toFixed(1),
+      teacher.coursHours.toFixed(1),
+      teacher.tdHours.toFixed(1),
+      teacher.tpHours.toFixed(1)
     ]);
 
     doc.autoTable({
-      head: [['N°', 'Nom Complet', 'Grade', 'Spécialisation', 'Email']],
+      head: [['N°', 'Nom Complet', 'Grade', 'Matières Enseignées', 'Total H', 'Cours H', 'TD H', 'TP H']],
       body: tableData,
       startY: filters.grade ? 65 : 55,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [102, 126, 234] },
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [102, 126, 234], fontSize: 10 },
       columnStyles: {
-        0: { cellWidth: 15 },
-        1: { cellWidth: 50 },
-        2: { cellWidth: 40 },
-        3: { cellWidth: 45 },
-        4: { cellWidth: 50 }
+        0: { cellWidth: 15, halign: 'center' },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 80 },
+        4: { cellWidth: 25, halign: 'center' },
+        5: { cellWidth: 25, halign: 'center' },
+        6: { cellWidth: 25, halign: 'center' },
+        7: { cellWidth: 25, halign: 'center' }
       }
     });
 
-    // Ajouter le total
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.text(`Total: ${teachersData.length} enseignant(s)`, 20, finalY);
+    // Calculer et afficher les totaux
+    const totalTeachers = teachersData.length;
+    const totalAllHours = teachersData.reduce((sum, t) => sum + t.totalHours, 0);
+    const totalCoursHours = teachersData.reduce((sum, t) => sum + t.coursHours, 0);
+    const totalTdHours = teachersData.reduce((sum, t) => sum + t.tdHours, 0);
+    const totalTpHours = teachersData.reduce((sum, t) => sum + t.tpHours, 0);
 
-    doc.save(`liste-enseignants-${Date.now()}.pdf`);
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Total: ${totalTeachers} enseignant(s)`, 20, finalY);
+    doc.text(`Total Heures: ${totalAllHours.toFixed(1)}h (Cours: ${totalCoursHours.toFixed(1)}h, TD: ${totalTdHours.toFixed(1)}h, TP: ${totalTpHours.toFixed(1)}h)`, 20, finalY + 10);
+
+    doc.save(`liste-enseignants-matieres-${Date.now()}.pdf`);
   };
 
   return (
